@@ -3,13 +3,21 @@
 // "Mark everything as paid" marks the current expenses as settled. They stay
 // in the history, but the settlement only counts expenses added after that.
 
-// Marks every unsettled expense in the group as settled, all with the same time,
+// Marks the unsettled expenses in the group as settled, all with the same time,
 // so they appear together as one settled round in the history.
-function settleUp(int $group_id): void {
+// Only expenses up to $up_to_id (the newest one the person could see when they
+// clicked) are settled, so an expense added in another tab or on another device
+// in the meantime stays open. Returns how many expenses are still open afterwards.
+function settleUp(int $group_id, int $up_to_id): int {
     global $conn;
-    $stmt = $conn->prepare("UPDATE expenses SET settled_at = NOW() WHERE group_id = ? AND settled_at IS NULL");
+    $stmt = $conn->prepare("UPDATE expenses SET settled_at = NOW() WHERE group_id = ? AND settled_at IS NULL AND id <= ?");
+    $stmt->bind_param("ii", $group_id, $up_to_id);
+    $stmt->execute();
+
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM expenses WHERE group_id = ? AND settled_at IS NULL");
     $stmt->bind_param("i", $group_id);
     $stmt->execute();
+    return (int) $stmt->get_result()->fetch_row()[0];
 }
 
 // Every expense in the group, newest first, with the share each person owes.

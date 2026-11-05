@@ -160,8 +160,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect("$self#settle");
 
     } elseif ($action === 'settle_all') {
-        settleUp($group_id);
-        flash('Everything is marked as paid. New expenses will start a fresh settlement.');
+        // The newest expense the page was showing when the button was clicked
+        $seen = postInt('last_expense_id');
+        if ($seen === 0) {
+            flash('Reload the page and try again.', 'bad');
+        } else {
+            $still_open = settleUp($group_id, $seen);
+            if ($still_open > 0) {
+                flash("Marked as paid. $still_open " . ($still_open === 1 ? 'expense was' : 'expenses were')
+                    . ' added after you opened the page, so ' . ($still_open === 1 ? 'it stays' : 'they stay') . ' open.');
+            } else {
+                flash('Everything is marked as paid. New expenses will start a fresh settlement.');
+            }
+        }
         redirect("$self#settle");
 
     } elseif ($action === 'remind') {
@@ -389,6 +400,7 @@ pageStart($group['name'], $user, 'theme-blush');
                       onsubmit="return confirm('Mark everything as paid? These expenses move to the history, and new expenses start a fresh settlement.');">
                     <?= csrfField() ?>
                     <input type="hidden" name="action" value="settle_all">
+                    <input type="hidden" name="last_expense_id" value="<?= $history['open'] ? max(array_keys($history['open'])) : 0 ?>">
                     <button type="submit" class="btn btn-quiet">Mark everything as paid</button>
                     <p class="muted">Use this once everyone has paid. New expenses then start a fresh settlement.</p>
                 </form>
