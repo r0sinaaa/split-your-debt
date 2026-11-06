@@ -6,8 +6,10 @@ function e($value): string {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+// A symbol such as € goes before the amount (€12.50); a word such as kr goes after it (12.50 kr)
 function money(float $amount): string {
-    return CURRENCY . number_format($amount, 2);
+    $number = number_format($amount, 2);
+    return preg_match('/^\p{L}+$/u', CURRENCY) ? $number . ' ' . CURRENCY : CURRENCY . $number;
 }
 
 function redirect(string $url): void {

@@ -5,7 +5,7 @@
 
 $config_defaults = [
     'APP_NAME'                => 'Evenly',
-    'CURRENCY'                => '€',
+    'CURRENCY'                => 'kr',
     'TIMEZONE'                => 'Europe/Copenhagen',
     'DB_HOST'                 => 'localhost',
     'DB_USER'                 => 'root',

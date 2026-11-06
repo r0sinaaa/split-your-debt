@@ -4,7 +4,7 @@
 
 // ---- The site -------------------------------------------------------------
 const APP_NAME = 'Evenly';
-const CURRENCY = 'dkk';
+const CURRENCY = 'kr';
 const TIMEZONE = 'Europe/Copenhagen';
 
 // ---- Database -------------------------------------------------------------
