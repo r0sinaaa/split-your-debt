@@ -30,7 +30,7 @@ function addGreedyEdges(array &$settlement, array $positions): void {
     while ($positions) {
         $creditor = array_keys($positions, max($positions))[0];
         $debtor   = array_keys($positions, min($positions))[0];
-        if ($positions[$creditor] <= 0 || $positions[$debtor] >= 0) break;   // everyone is even
+        if ($positions[$creditor] <= 0 || $positions[$debtor] >= 0) break;  // all even
 
         $amount = min($positions[$creditor], -$positions[$debtor]);
         addDebtEdge($settlement, $debtor, $creditor, $amount);
