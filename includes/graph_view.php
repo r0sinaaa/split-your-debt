@@ -79,3 +79,40 @@ function graphDescription(array $g, array $names): string {
     }
     return $parts ? implode('; ', $parts) : 'No debts';
 }
+
+// The two graphs of a round of expenses that has been paid off: the debts the
+// expenses created, and the payments people recorded with "Mark as paid".
+// Payments are stored as expenses (is_payment = 1) from the person who paid to
+// the one person they paid, so they are drawn as arrows in that direction.
+function roundGraphs(array $round): array {
+    $shares = [];
+    $payments = newDebtGraph();
+    foreach ($round as $expense) {
+        if ($expense['is_payment']) {
+            $to = array_key_first($expense['shares']);
+            if ($to !== null) {
+                addDebtEdge($payments, $expense['payer_id'], $to, (int) round($expense['amount'] * 100));
+            }
+            continue;
+        }
+        foreach ($expense['shares'] as $member => $share) {
+            $shares[] = [$expense['payer_id'], $member, (int) round($share * 100)];
+        }
+    }
+    return ['debts' => buildDebtGraph($shares), 'payments' => $payments];
+}
+
+// HTML for the two graphs side by side. $id must be unique on the page.
+function roundGraphsHtml(array $round, array $names, array $order, string $id): string {
+    $graphs = roundGraphs($round);
+    $debts = edgeCount($graphs['debts']);
+    $paid = edgeCount($graphs['payments']);
+    $html = '<div class="graph-view">';
+    $html .= '<figure>' . debtGraphSvg($graphs['debts'], $names, $order, "$id-debts")
+           . '<figcaption>Before paying: ' . $debts . ' ' . ($debts === 1 ? 'debt' : 'debts') . '</figcaption></figure>';
+    $html .= '<figure>' . debtGraphSvg($graphs['payments'], $names, $order, "$id-paid")
+           . '<figcaption>' . ($paid
+                ? 'Payments made: ' . $paid . ' ' . ($paid === 1 ? 'payment' : 'payments')
+                : 'No payments were marked in the app') . '</figcaption></figure>';
+    return $html . '</div>';
+}

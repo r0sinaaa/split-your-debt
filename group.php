@@ -288,6 +288,10 @@ pageStart($group['name'], $user, 'theme-blush');
                     <p class="empty">Nothing to settle yet. Add an expense and the payments show up here.</p>
                 <?php else: ?>
                     <p class="settled-msg">Everyone's settled up.</p>
+                    <?php $last_round = $history['open'] ?: reset($history['settled']); ?>
+                    <h3 class="subhead">The debt graph</h3>
+                    <p class="muted">The debts from the last round of expenses, and the payments that settled them.</p>
+                    <?= roundGraphsHtml($last_round, $names, array_keys($members), 'graph-last') ?>
                 <?php endif; ?>
             <?php else: ?>
                 <p class="muted mode-note">
@@ -537,7 +541,7 @@ pageStart($group['name'], $user, 'theme-blush');
             </ul>
         <?php endif; ?>
 
-        <?php foreach ($history['settled'] as $settled_at => $round): ?>
+        <?php $round_no = 0; foreach ($history['settled'] as $settled_at => $round): $round_no++; ?>
             <?php $round_total = array_sum(array_column(array_filter($round, fn($x) => !$x['is_payment']), 'amount')); ?>
             <details class="round">
                 <summary>
@@ -557,6 +561,7 @@ pageStart($group['name'], $user, 'theme-blush');
                         </li>
                     <?php endforeach; ?>
                 </ul>
+                <?= roundGraphsHtml($round, $names, array_keys($members), 'graph-round-' . $round_no) ?>
             </details>
         <?php endforeach; ?>
     </section>

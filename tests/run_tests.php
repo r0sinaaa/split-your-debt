@@ -21,6 +21,7 @@ require __DIR__ . '/../includes/debt_graph.php';
 require __DIR__ . '/../includes/algorithm.php';
 require __DIR__ . '/../includes/optimal.php';
 require __DIR__ . '/../includes/shared_settlement.php';
+require __DIR__ . '/../includes/graph_view.php';
 
 $passed = 0;
 $failed = 0;
@@ -257,6 +258,39 @@ for ($i = 0; $i < 5000; $i++) {
 }
 check('shared: 5,000 random groups all settle to exactly 0.00', $bad_total === 0, "$bad_total groups were wrong");
 check('shared: payments only follow edges of the shared-expense graph', $bad_pair === 0, "$bad_pair groups broke the rule");
+
+// ---- Graphs of a paid-off round (roundGraphs) ---------------------------------
+
+// The demo group from the report: dinner (Mia for Rosina, Mia, Leo) and taxi (Kai
+// for Kai, Ansun, Puspa) on top of three one-person expenses, then the three
+// payments the app suggested, recorded with "Mark as paid".
+$exp = fn(int $payer, float $amount, array $shares, bool $pay = false) =>
+    ['payer_id' => $payer, 'amount' => $amount, 'is_payment' => $pay, 'shares' => $shares];
+$round = [
+    $exp(1, 40, [6 => 40]), $exp(5, 80, [6 => 80]), $exp(2, 90, [4 => 90]),
+    $exp(5, 120, [1 => 40, 5 => 40, 6 => 40]), $exp(4, 90, [4 => 30, 2 => 30, 3 => 30]),
+    $exp(6, 160, [5 => 160], true), $exp(3, 30, [2 => 30], true), $exp(4, 30, [2 => 30], true),
+];
+$rg = roundGraphs($round);
+check('round graphs: the five recorded debts of the demo group', edgeCount($rg['debts']) === 5, json_encode($rg['debts']['edges']));
+check('round graphs: payments are drawn from the person who paid to the person paid',
+    $rg['payments']['edges'] === [6 => [5 => 16000], 3 => [2 => 3000], 4 => [2 => 3000]], json_encode($rg['payments']['edges']));
+check('round graphs: the payments leave everyone where the debts did', samePositions($rg['debts'], $rg['payments']));
+
+mt_srand(11);
+$bad = 0;
+for ($i = 0; $i < 2000; $i++) {
+    [$cents, $g] = randomGroup();
+    $round = [];
+    foreach ($g['edges'] as $from => $out) {
+        foreach ($out as $to => $c) $round[] = $exp($to, $c / 100, [$from => $c / 100]);
+    }
+    foreach (graphPayments(optimalSettle($g)) as $t) $round[] = $exp($t['from'], $t['amount'], [$t['to'] => $t['amount']], true);
+    $rg = roundGraphs($round);
+    if (!samePositions($rg['debts'], $rg['payments']) || !samePositions($g, $rg['debts'])
+        || edgeCount($rg['payments']) !== edgeCount(optimalSettle($g))) $bad++;
+}
+check('round graphs: 2,000 random paid-off rounds draw consistent graphs', $bad === 0, "$bad rounds were wrong");
 
 // ---- Reading amounts typed into the form (parseAmount) ---------------------
 
