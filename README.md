@@ -104,6 +104,6 @@ shared", compares them with the naive baseline (the number of edges in the debt 
 | `send_reminders.php` | Automatic reminders, run on a schedule |
 | `config.php` | All settings |
 | `includes/` | Shared code: database, accounts, settlement, reminders, email (PHPMailer) |
-| `assets/` | Styles and the home page animation |
+| `assets/` | Styles, the home page animation, live updates (`live.js`) and double-submit protection (`forms.js`) |
 | `tests/` | `run_tests.php` (tests) and `benchmark.php` (thesis experiments, results in `tests/results/`) |
 | `storage/` | `outbox.log` while email isn't set up, and `error.log` |
