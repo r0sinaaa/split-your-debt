@@ -10,7 +10,7 @@ and it emails a reminder to the people who owe. People who are owed money never 
 3. Start **Apache** and **MySQL** in the XAMPP control panel.
 4. Open <http://localhost/split-your-debt/>.
 
-The database (`split_your_debt`) and its tables are created the first time a page loads.
+The database (`evenly_db`) and its tables are created the first time a page loads.
 If your MySQL user isn't `root` with no password, change it in `config.php`.
 
 ## How it works
