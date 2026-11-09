@@ -98,6 +98,7 @@ shared", compares them with the naive baseline (the number of edges in the debt 
 | --- | --- |
 | `index.php` | Home page |
 | `register.php`, `login.php`, `logout.php` | Accounts (email + password) |
+| `forgot_password.php`, `reset_password.php` | Password reset by an emailed one-time link (valid 60 minutes) |
 | `groups.php` | Your dashboard: your groups, what you owe and are owed, and info about the site |
 | `group.php` | One group: expenses, who pays whom, reminders, people, history |
 | `group_state.php` | Small JSON endpoint polled by the group page for live updates |
