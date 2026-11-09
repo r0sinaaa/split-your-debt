@@ -21,7 +21,7 @@ function errorHint(Throwable $e): string {
 
     if ($code === 1932) {
         return 'MySQL has lost track of a table (this usually happens after XAMPP\'s MySQL crashes). '
-             . 'Open phpMyAdmin, run DROP DATABASE ' . (defined('DB_NAME') ? DB_NAME : 'split_your_debt') . '; '
+             . 'Open phpMyAdmin, run DROP DATABASE ' . (defined('DB_NAME') ? DB_NAME : 'evenly_db') . '; '
              . 'and reload the site to create a fresh one. Or change DB_NAME in config.php to a new name.';
     }
     if ($code === 1146 || $code === 1054) {
