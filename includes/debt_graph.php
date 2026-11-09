@@ -5,13 +5,13 @@
 //   - every member is a node
 //   - every debt is an edge from the person who owes to the person they owe,
 //     weighted by the amount in whole cents
-// Between two people there is at most one edge. If A owes B €10 and B owes
-// A €4, the graph holds a single edge A -> B worth €6.
+// Between two people there is at most one edge. If A owes B 10 kr and B owes
+// A 4 kr, the graph holds a single edge A -> B worth 6 kr.
 //
 // A graph is a plain array:
 //   'nodes'  => [member_id => true, ...]
 //   'edges'  => [from_id => [to_id => cents, ...], ...]   (adjacency list, cents > 0)
-//   'shared' => ['1-4' => true, ...]   pairs who have been on an expense together
+//   'shared' => ['1-4' => true, ...]   payer-participant pairs: one paid for an expense the other was on
 //
 // A settlement is a debt graph too: the same nodes, with one edge per payment.
 // It is correct when every node keeps the same net position as in the
@@ -165,7 +165,7 @@ function isForest(array $g): bool {
     return edgeCount($g) === $touched - count($components);
 }
 
-// The payments in a settlement graph, largest first, in euros for display:
+// The payments in a settlement graph, largest first, in kroner for display:
 // [['from' => member_id, 'to' => member_id, 'amount' => float], ...]
 function graphPayments(array $g): array {
     $txns = [];
@@ -178,7 +178,7 @@ function graphPayments(array $g): array {
     return $txns;
 }
 
-// A debt graph with the given balances (in euros, positive = owed money).
+// A debt graph with the given balances (in kroner, positive = owed money).
 // Used by the tests and examples, which start from balances rather than
 // expenses: each debtor gets edges to the creditors in turn.
 function debtGraphFromBalances(array $balances): array {

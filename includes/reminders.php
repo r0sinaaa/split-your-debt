@@ -33,7 +33,7 @@ function logReminder(int $group_id, int $member_id, string $channel, float $amou
     $stmt->execute();
 }
 
-// "Niraj €10.00 and Mia €4.00"
+// "Niraj 10.00 kr and Mia 4.00 kr"
 function describePayments(array $payments, array $members): string {
     $parts = [];
     foreach ($payments as $to => $amount) {

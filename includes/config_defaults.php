@@ -18,7 +18,7 @@ $config_defaults = [
     'SMTP_PASS'               => '',
     'MAIL_FROM'               => '',
     'MAIL_FROM_NAME'          => null,   // falls back to APP_NAME
-    'REMINDER_COOLDOWN_HOURS' => 12,
+    'REMINDER_COOLDOWN_HOURS' => 0,    // no wait between manual reminders
     'AUTO_REMINDER_DAYS'      => 3,
 ];
 

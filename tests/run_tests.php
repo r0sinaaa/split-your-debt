@@ -15,7 +15,7 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-const CURRENCY = '€';
+const CURRENCY = 'kr';
 require __DIR__ . '/../includes/helpers.php';
 require __DIR__ . '/../includes/debt_graph.php';
 require __DIR__ . '/../includes/algorithm.php';
@@ -73,7 +73,7 @@ function randomGroup(): array {
     return [$cents, buildDebtGraph($shares, $people), $debts];
 }
 
-// Balances made from whole-euro shares (like splitting a bill "€10 each"), in cents
+// Balances made from whole-krone shares (like splitting a bill "10 kr each"), in cents
 function roundBalances(int $people): array {
     $cents = array_fill(0, $people, 0);
     for ($e = mt_rand(1, 8); $e > 0; $e--) {
@@ -291,6 +291,11 @@ for ($i = 0; $i < 2000; $i++) {
         || edgeCount($rg['payments']) !== edgeCount(optimalSettle($g))) $bad++;
 }
 check('round graphs: 2,000 random paid-off rounds draw consistent graphs', $bad === 0, "$bad rounds were wrong");
+
+// ---- Who an expense is split between (cleanSplitIds) -----------------------
+
+check('split ids: a person sent twice is counted once', cleanSplitIds(['3', '5', '3', '5'], [3, 5, 7]) === [3, 5]);
+check('split ids: people outside the group are dropped', cleanSplitIds(['3', '99', 'x'], [3, 5, 7]) === [3]);
 
 // ---- Reading amounts typed into the form (parseAmount) ---------------------
 

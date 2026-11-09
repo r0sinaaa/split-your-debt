@@ -33,8 +33,8 @@ If your MySQL user isn't `root` with no password, change it in `config.php`.
 - **Mark as paid** records one payment (you can undo it from History). **Mark everything as paid** closes the round and starts a fresh one.
 - Expenses that aren't settled yet can be **edited or deleted** from History. Adding the same expense twice within 30 seconds is ignored.
 - All money is worked out in whole cents, so amounts always add up exactly.
-- **Send reminder** emails the people who owe. The same person can't be reminded
-  again within 12 hours. Change `REMINDER_COOLDOWN_HOURS` in `config.php` if you want a different wait.
+- **Send reminder** emails the people who owe. You can remind someone again straight away;
+  set `REMINDER_COOLDOWN_HOURS` in `config.php` (for example to 12) if you want a wait between reminders.
 
 ## Turn on real emails
 

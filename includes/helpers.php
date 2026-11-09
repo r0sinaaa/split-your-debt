@@ -84,3 +84,9 @@ function listNames(array $names): string {
     if (count($names) <= 1) return implode('', $names);
     return implode(', ', array_slice($names, 0, -1)) . ' and ' . end($names);
 }
+
+// The people ticked on an expense form, as member ids: only people in the group,
+// each person once (a changed form could send the same id twice), in the order sent.
+function cleanSplitIds(array $ticked, array $member_ids): array {
+    return array_values(array_unique(array_intersect(array_map('intval', $ticked), $member_ids)));
+}

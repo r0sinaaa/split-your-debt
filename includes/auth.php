@@ -164,6 +164,11 @@ function resetPassword(int $user_id, string $password): void {
 
 // The full address of a page on this site, for links in emails
 function siteUrl(string $page): string {
+    // On a real server, set APP_URL in config.php so links in emails never
+    // depend on the Host header a visitor sends
+    if (defined('APP_URL') && APP_URL !== '') {
+        return rtrim(APP_URL, '/') . "/$page";
+    }
     $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $dir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');

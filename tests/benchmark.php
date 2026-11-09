@@ -11,7 +11,7 @@
 //
 // Two kinds of amounts are tested:
 //   cents  - any amount to the cent (e.g. 37.42 split three ways)
-//   round  - whole-euro shares, like "10 each" (common when splitting bills)
+//   round  - whole-krone shares, like "10 each" (common when splitting bills)
 
 if (PHP_SAPI !== 'cli') {
     http_response_code(404);
@@ -19,7 +19,7 @@ if (PHP_SAPI !== 'cli') {
 }
 ini_set('memory_limit', '1024M');
 
-const CURRENCY = '€';
+const CURRENCY = 'kr';
 require __DIR__ . '/../includes/helpers.php';
 require __DIR__ . '/../includes/debt_graph.php';
 require __DIR__ . '/../includes/algorithm.php';

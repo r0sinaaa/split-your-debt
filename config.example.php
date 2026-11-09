@@ -6,6 +6,9 @@
 const APP_NAME = 'Evenly';
 const CURRENCY = 'kr';
 const TIMEZONE = 'Europe/Copenhagen';
+// Full address of the site, used in password-reset emails. Leave empty on XAMPP;
+// on a real server set it, e.g. 'https://evenly.example.com', so links never use the Host header.
+const APP_URL = '';
 
 // ---- Database -------------------------------------------------------------
 // XAMPP's default is user "root" with no password.

@@ -66,7 +66,7 @@ function getExpenseHistory(int $group_id): array {
     return $history;
 }
 
-// One line describing an expense, e.g. "Niraj paid, split between everyone (€10.00 each)"
+// One line describing an expense, e.g. "Niraj paid, split between everyone (10.00 kr each)"
 // $members is [id => name]
 function describeExpense(array $expense, array $members): string {
     $payer = $members[$expense['payer_id']] ?? 'Someone';

@@ -157,14 +157,43 @@ function removeMember(int $member_id): void {
 function addExpense(int $group_id, int $payer_id, float $amount, string $description, array $split_ids, bool $is_payment = false): void {
     global $conn;
     $conn->begin_transaction();
+    insertExpense($group_id, $payer_id, $amount, $description, $split_ids, $is_payment);
+    $conn->commit();
+}
 
+// The insert itself, for callers that already run their own transaction
+function insertExpense(int $group_id, int $payer_id, float $amount, string $description, array $split_ids, bool $is_payment = false): void {
+    global $conn;
     $payment_flag = $is_payment ? 1 : 0;
     $stmt = $conn->prepare("INSERT INTO expenses (group_id, payer_id, amount, description, is_payment) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("iidsi", $group_id, $payer_id, $amount, $description, $payment_flag);
     $stmt->execute();
     insertSplits($conn->insert_id, $amount, $split_ids);
+}
 
-    $conn->commit();
+// Records one suggested payment as paid, but only if it is still part of the
+// settlement. The group row is locked while checking and saving, so two
+// requests at the same moment (a double click, two people on two phones)
+// can't both record the same payment. Returns the amount, or null if the
+// payment was no longer outstanding.
+function recordPaymentOnce(array $group, int $from, int $to): ?float {
+    global $conn;
+    $group_id = (int) $group['id'];
+    $conn->begin_transaction();
+    $stmt = $conn->prepare("SELECT id FROM expense_groups WHERE id = ? FOR UPDATE");
+    $stmt->bind_param("i", $group_id);
+    $stmt->execute();
+    $stmt->get_result();
+
+    foreach (getSettlement($group) as $t) {
+        if ((int) $t['from'] === $from && (int) $t['to'] === $to) {
+            insertExpense($group_id, $from, $t['amount'], 'Payment', [$to], true);
+            $conn->commit();
+            return (float) $t['amount'];
+        }
+    }
+    $conn->rollback();
+    return null;
 }
 
 // Shares an amount equally, in cents, between $split_ids
@@ -228,14 +257,22 @@ function deleteExpense(int $expense_id): void {
 }
 
 // True if the exact same expense was added in the last 30 seconds (a double click)
-function isRecentDuplicate(int $group_id, int $payer_id, float $amount, string $description): bool {
+function isRecentDuplicate(int $group_id, int $payer_id, float $amount, string $description, array $split_ids): bool {
     global $conn;
-    $stmt = $conn->prepare("SELECT COUNT(*) AS n FROM expenses
-                            WHERE group_id = ? AND payer_id = ? AND amount = ? AND description = ? AND is_payment = 0
-                              AND created_at > NOW() - INTERVAL 30 SECOND");
+    $stmt = $conn->prepare("SELECT e.id, GROUP_CONCAT(es.member_id ORDER BY es.member_id) AS who
+                            FROM expenses e JOIN expense_splits es ON es.expense_id = e.id
+                            WHERE e.group_id = ? AND e.payer_id = ? AND e.amount = ? AND e.description = ? AND e.is_payment = 0
+                              AND e.created_at > NOW() - INTERVAL 30 SECOND
+                            GROUP BY e.id");
     $stmt->bind_param("iids", $group_id, $payer_id, $amount, $description);
     $stmt->execute();
-    return (int) $stmt->get_result()->fetch_assoc()['n'] > 0;
+    $sorted = array_map('intval', $split_ids);
+    sort($sorted);
+    $who = implode(',', $sorted);
+    foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
+        if ($row['who'] === $who) return true;   // same payer, amount, description and people
+    }
+    return false;
 }
 
 // A short fingerprint of everything shown on the group page. It changes whenever

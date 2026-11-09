@@ -41,7 +41,7 @@ function checkExpenseForm(array $members): array {
         'amount'      => $amount ?? 0.0,
         'description' => postText('description'),
         // Only keep ticked people who really belong to this group
-        'split_ids'   => array_values(array_intersect(array_map('intval', $ticked), array_keys($members))),
+        'split_ids'   => cleanSplitIds($ticked, array_keys($members)),
     ];
 
     if (!isset($members[$data['payer_id']])) return ['Choose who paid.', $data];
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('Saved ' . $data['description'] . ' (' . money($data['amount']) . ').');
                 redirect("$self#history");
             }
-            if (isRecentDuplicate($group_id, $data['payer_id'], $data['amount'], $data['description'])) {
+            if (isRecentDuplicate($group_id, $data['payer_id'], $data['amount'], $data['description'], $data['split_ids'])) {
                 flash($data['description'] . ' was already added a moment ago, so it wasn\'t added twice.', 'bad');
             } else {
                 addExpense($group_id, $data['payer_id'], $data['amount'], $data['description'], $data['split_ids']);
@@ -144,16 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // click or an old tab can't record the same payment twice
         $from = postInt('from');
         $to = postInt('to');
-        $match = null;
-        foreach (getSettlement($group) as $t) {
-            if ((int) $t['from'] === $from && (int) $t['to'] === $to) {
-                $match = $t;
-                break;
-            }
-        }
-        if ($match) {
-            addExpense($group_id, $from, $match['amount'], 'Payment', [$to], true);
-            flash($names[$from] . ' paying ' . $names[$to] . ' ' . money($match['amount']) . ' is marked as paid.');
+        $paid = recordPaymentOnce($group, $from, $to);
+        if ($paid !== null) {
+            flash($names[$from] . ' paying ' . $names[$to] . ' ' . money($paid) . ' is marked as paid.');
         } else {
             flash('That payment was already marked as paid.', 'bad');
         }
