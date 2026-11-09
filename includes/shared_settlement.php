@@ -4,8 +4,8 @@
 //
 // This works directly on two graphs from debt_graph.php:
 //   - the debt graph's edges: $debts[$from][$to] = cents (directed, weighted)
-//   - the shared-expense graph: $shared['1-4'] = true when people 1 and 4 have
-//     been on an expense together (undirected). A payment is only allowed
+//   - the shared-expense graph: $shared['1-4'] = true when one of people 1 and 4
+//     paid for an expense the other was on (payer-participant pair, undirected). A payment is only allowed
 //     along an edge of this graph.
 // It uses depth-first search to find and cancel cycles of debt, shortens
 // chains of debt along shared-expense edges, and uses breadth-first search to
